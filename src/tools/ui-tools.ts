@@ -23,7 +23,7 @@ export const uiTools: ToolDefinition[] = [
         type: "object",
         properties: {
           showAll: { type: "boolean", description: "Show all elements including non-interactive ones", default: false },
-          platform: { type: "string", enum: ["android", "ios", "desktop", "aurora", "browser"], description: "Target platform. If not specified, uses the active target." },
+          platform: { type: "string", enum: ["android", "ios"], description: "Target platform. If not specified, uses the active target." },
         },
       },
     },
@@ -48,10 +48,6 @@ export const uiTools: ToolDefinition[] = [
 
       const xml = await ctx.deviceManager.getUiHierarchyAsync(platform);
 
-      if (currentPlatform === "desktop") {
-        return { text: xml };
-      }
-
       // Android: parse XML and format
       const parsedElements = parseUiHierarchy(xml);
       ctx.setCachedElements("android", parsedElements);
@@ -74,7 +70,7 @@ export const uiTools: ToolDefinition[] = [
           className: { type: "string", description: "Find by class name (Android: full class, iOS: XCUIElementType*)" },
           clickable: { type: "boolean", description: "Android: Filter by clickable state" },
           visible: { type: "boolean", description: "iOS: Filter by visibility" },
-          platform: { type: "string", enum: ["android", "ios", "desktop", "aurora", "browser"], description: "Target platform. If not specified, uses the active target." },
+          platform: { type: "string", enum: ["android", "ios"], description: "Target platform. If not specified, uses the active target." },
         },
       },
     },
@@ -140,7 +136,7 @@ export const uiTools: ToolDefinition[] = [
         properties: {
           description: { type: "string", description: "Natural language description of the element to tap, e.g., 'submit button', 'settings', 'back'" },
           minConfidence: { type: "number", description: "Minimum confidence score (0-100) to accept a match (default: 30)", default: 30 },
-          platform: { type: "string", enum: ["android", "ios", "desktop", "aurora", "browser"], description: "Target platform. If not specified, uses the active target." },
+          platform: { type: "string", enum: ["android", "ios"], description: "Target platform. If not specified, uses the active target." },
         },
         required: ["description"],
       },
@@ -201,33 +197,7 @@ export const uiTools: ToolDefinition[] = [
       const platform = args.platform as Platform | undefined;
       const currentPlatform = platform ?? ctx.deviceManager.getCurrentPlatform();
 
-      if (currentPlatform !== "desktop") {
-        return { text: "tap_by_text is only available for Desktop (macOS). Use find_and_tap for Android or tap with coordinates for iOS." };
-      }
-
-      const text = args.text as string;
-      const pid = args.pid as number;
-      const exactMatch = (args.exactMatch as boolean) ?? false;
-
-      if (!text) {
-        return { text: "Missing required parameter: text" };
-      }
-      if (!pid) {
-        return { text: "Missing required parameter: pid. Use get_window_info to find the process ID." };
-      }
-
-      const result = await ctx.deviceManager.getDesktopClient().tapByText(text, pid, exactMatch);
-
-      if (result.success) {
-        return {
-          text: `✅ Tapped "${text}" (element: ${result.elementRole ?? "unknown"})\n` +
-                `Cursor was NOT moved - background automation successful.`
-        };
-      } else {
-        return {
-          text: `❌ Failed to tap "${text}": ${result.error}`
-        };
-      }
+      return { text: "tap_by_text is only available for Desktop (macOS). Use find_and_tap for Android or tap with coordinates for iOS." };
     },
   },
   {
@@ -237,7 +207,7 @@ export const uiTools: ToolDefinition[] = [
       inputSchema: {
         type: "object",
         properties: {
-          platform: { type: "string", enum: ["android", "ios", "desktop", "aurora", "browser"], description: "Target platform. If not specified, uses the active target." },
+          platform: { type: "string", enum: ["android", "ios"], description: "Target platform. If not specified, uses the active target." },
         },
       },
     },
@@ -270,14 +240,6 @@ export const uiTools: ToolDefinition[] = [
                   `Error: ${error.message}`
           };
         }
-      } else if (currentPlatform === "desktop") {
-        try {
-          const hierarchyText = await ctx.deviceManager.getUiHierarchyAsync("desktop");
-          screenElements = desktopHierarchyToUiElements(hierarchyText);
-          ctx.setCachedElements("desktop", screenElements);
-        } catch (error: any) {
-          return { text: `Desktop UI hierarchy not available: ${error.message}` };
-        }
       } else {
         return { text: `analyze_screen is not supported for platform: ${currentPlatform}` };
       }
@@ -298,7 +260,7 @@ export const uiTools: ToolDefinition[] = [
           className: { type: "string", description: "Class name to wait for" },
           timeout: { type: "number", description: "Max wait time in ms (default: 5000)", default: 5000 },
           interval: { type: "number", description: "Poll interval in ms (default: 500)", default: 500 },
-          platform: { type: "string", enum: ["android", "ios", "desktop", "aurora", "browser"], description: "Target platform. If not specified, uses the active target." },
+          platform: { type: "string", enum: ["android", "ios"], description: "Target platform. If not specified, uses the active target." },
         },
       },
     },
@@ -364,7 +326,7 @@ export const uiTools: ToolDefinition[] = [
         properties: {
           text: { type: "string", description: "Element text to check for (partial match)" },
           resourceId: { type: "string", description: "Android: resource ID to check for" },
-          platform: { type: "string", enum: ["android", "ios", "desktop", "aurora", "browser"], description: "Target platform. If not specified, uses the active target." },
+          platform: { type: "string", enum: ["android", "ios"], description: "Target platform. If not specified, uses the active target." },
         },
       },
     },
@@ -409,7 +371,7 @@ export const uiTools: ToolDefinition[] = [
         properties: {
           text: { type: "string", description: "Element text that should NOT be present" },
           resourceId: { type: "string", description: "Android: resource ID that should NOT be present" },
-          platform: { type: "string", enum: ["android", "ios", "desktop", "aurora", "browser"], description: "Target platform. If not specified, uses the active target." },
+          platform: { type: "string", enum: ["android", "ios"], description: "Target platform. If not specified, uses the active target." },
         },
       },
     },

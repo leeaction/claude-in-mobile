@@ -2,7 +2,7 @@
 name = "claude-in-mobile"
 version = "2.13.2"
 edition = "2021"
-description = "Fast native CLI for mobile device automation (Android/iOS/Aurora/Desktop)"
+description = "Fast native CLI for mobile device automation (Android/iOS)"
 authors = ["defendend", "Alex Gladkov"]
 license = "MIT"
 

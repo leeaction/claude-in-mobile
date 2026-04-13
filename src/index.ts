@@ -16,14 +16,8 @@ import { uiTools } from "./tools/ui-tools.js";
 import { appTools } from "./tools/app-tools.js";
 import { permissionTools } from "./tools/permission-tools.js";
 import { systemTools } from "./tools/system-tools.js";
-import { desktopTools } from "./tools/desktop-tools.js";
-import { auroraTools } from "./tools/aurora-tools.js";
 import { flowTools } from "./tools/flow-tools.js";
 import { clipboardTools } from "./tools/clipboard-tools.js";
-import { browserTools } from "./tools/browser-tools.js";
-import { storeTools } from "./tools/store-tools.js";
-import { huaweiTools } from "./tools/huawei-tools.js";
-import { ruStoreTools } from "./tools/rustore-tools.js";
 import { detectClient, getConfigSnippet } from "./client-adapter.js";
 import { SonicDeviceSource } from "./sonic/sonic-device-source.js";
 
@@ -53,14 +47,8 @@ registerTools([
   ...appTools,
   ...permissionTools,
   ...systemTools,
-  ...desktopTools,
-  ...auroraTools,
   ...flowTools,
   ...clipboardTools,
-  ...browserTools,
-  ...storeTools,
-  ...huaweiTools,
-  ...ruStoreTools,
 ]);
 
 // Backward compat: v3.0.x names → v3.1.x canonical names
@@ -102,16 +90,6 @@ registerAliases({
   // screenshot
   "screenshot": "screen_capture",
   "annotate_screenshot": "screen_annotate",
-  // desktop
-  "launch_desktop_app": "desktop_launch",
-  "stop_desktop_app": "desktop_stop",
-  "get_window_info": "desktop_windows",
-  "focus_window": "desktop_focus",
-  "resize_window": "desktop_resize",
-  "get_clipboard": "clipboard_get",
-  "set_clipboard": "clipboard_set",
-  "get_performance_metrics": "desktop_performance",
-  "get_monitors": "desktop_monitors",
   // clipboard
   "select_text": "clipboard_select",
   "copy_text": "clipboard_copy",
@@ -124,9 +102,6 @@ registerAliases({
   "grant_permission": "permission_grant",
   "revoke_permission": "permission_revoke",
   "reset_permissions": "permission_reset",
-  // file (aurora)
-  "push_file": "file_push",
-  "pull_file": "file_pull",
   // LLM misnaming helpers
   "press_button": "input_key",
   "type_text": "input_text",
@@ -165,7 +140,7 @@ const server = new Server(
     capabilities: {
       tools: {},
     },
-    instructions: "Mobile, desktop, browser automation + store management (Google Play, Huawei AppGallery, RuStore). IMPORTANT: Always use 'ui_tree' first to inspect the screen — it is text-based and ~10x cheaper than screenshots. Use 'screen_capture' only as fallback when visual verification is required or ui_tree is insufficient. Use 'input_tap' to interact. For stores: 'store_upload' → 'store_set_notes' → 'store_submit' (Google Play), 'huawei_upload' → 'huawei_set_notes' → 'huawei_submit' (Huawei), 'rustore_upload' → 'rustore_set_notes' → 'rustore_submit' (RuStore). Use 'device_list' to see connected devices.",
+    instructions: "Mobile automation for Android and iOS. Supports local devices (ADB, simctl) and remote Sonic devices. IMPORTANT: Always use 'ui_tree' first to inspect the screen — it is text-based and ~10x cheaper than screenshots. Use 'screen_capture' only as fallback when visual verification is required or ui_tree is insufficient. Use 'input_tap' to interact. Use 'device_list' to see connected devices.",
   }
 );
 
@@ -286,7 +261,7 @@ async function main() {
 
   await server.connect(transport);
   console.error("Test connected to device");
-  console.error("Claude Mobile MCP server running (Android + iOS + Desktop + Aurora + Browser)");
+  console.error("Claude Mobile MCP server running (Android + iOS)");
 
   process.on("SIGTERM", () => { sonicSource?.stop(); });
   process.on("SIGINT",  () => { sonicSource?.stop(); });

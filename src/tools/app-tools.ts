@@ -67,7 +67,7 @@ export const appTools: ToolDefinition[] = [
       inputSchema: {
         type: "object",
         properties: {
-          platform: { type: "string", enum: ["android", "ios", "aurora"], description: "Target platform" },
+          platform: { type: "string", enum: ["android", "ios"], description: "Target platform" },
         },
         required: [],
       },
@@ -75,11 +75,6 @@ export const appTools: ToolDefinition[] = [
     handler: async (args, ctx) => {
       const platform = args.platform as Platform | undefined;
       const currentPlatform = platform ?? ctx.deviceManager.getCurrentPlatform();
-
-      if (currentPlatform === "aurora") {
-        const packages = ctx.deviceManager.getAuroraClient().listPackages();
-        return { text: `Installed packages (${packages.length}):\n${packages.join("\n")}` };
-      }
 
       if (ctx.deviceManager.isSonicMode() && (currentPlatform === "android" || currentPlatform === "ios")) {
         const apps = await ctx.deviceManager.getAppList(platform);

@@ -10,9 +10,6 @@
 import type { PlatformAdapter } from "./adapters/platform-adapter.js";
 import { AndroidAdapter } from "./adapters/android-adapter.js";
 import { IosAdapter } from "./adapters/ios-adapter.js";
-import { DesktopAdapter } from "./adapters/desktop-adapter.js";
-import { AuroraAdapter } from "./adapters/aurora-adapter.js";
-import { BrowserAdapter } from "./adapters/browser-adapter.js";
 
 import { SonicDeviceSource } from "./sonic/sonic-device-source.js";
 import { SonicAndroidAdapter } from "./sonic/sonic-android-adapter.js";
@@ -20,13 +17,10 @@ import { SonicIosAdapter } from "./sonic/sonic-ios-adapter.js";
 
 import { AdbClient } from "./adb/client.js";
 import { IosClient } from "./ios/client.js";
-import { DesktopClient } from "./desktop/client.js";
-import type { AuroraClient } from "./aurora/index.js";
 import type { CompressOptions } from "./utils/image.js";
-import type { LaunchOptions } from "./desktop/types.js";
 import { WebViewInspector } from "./adb/webview.js";
 
-export type Platform = "android" | "ios" | "desktop" | "aurora" | "browser";
+export type Platform = "android" | "ios";
 
 export interface Device {
   id: string;
@@ -39,9 +33,6 @@ export interface Device {
 export class DeviceManager {
   private androidAdapter: AndroidAdapter;
   private iosAdapter: IosAdapter;
-  private desktopAdapter: DesktopAdapter;
-  private auroraAdapter: AuroraAdapter;
-  private browserAdapter: BrowserAdapter;
 
   private adapters: Map<Platform, PlatformAdapter>;
   private activeDevice?: Device;
@@ -64,16 +55,9 @@ export class DeviceManager {
       ? new IosAdapter(new IosClient(iosDeviceId))
       : new IosAdapter();
 
-    this.desktopAdapter = new DesktopAdapter();
-    this.auroraAdapter = new AuroraAdapter();
-    this.browserAdapter = new BrowserAdapter();
-
     this.adapters = new Map<Platform, PlatformAdapter>([
       ["android", this.androidAdapter],
       ["ios", this.iosAdapter],
-      ["desktop", this.desktopAdapter],
-      ["aurora", this.auroraAdapter],
-      ["browser", this.browserAdapter],
     ]);
 
     // If env var specified a device, set it as active target
@@ -107,12 +91,6 @@ export class DeviceManager {
       throw new Error(`Unknown platform: ${target}`);
     }
 
-    // Desktop and Browser return immediately — the adapter itself guards state
-    // where needed (actions, screenshots, UI). Logs/clearLogs work even when stopped.
-    if (target === "desktop" || target === "browser") {
-      return adapter;
-    }
-
     // FIX #8 — auto-detect device when none is selected.
     // After a server restart the in-memory deviceId is lost, so we probe
     // the platform for a connected device before the command runs.
@@ -135,11 +113,6 @@ export class DeviceManager {
   }
 
   getTarget(): { target: Platform; status: string } {
-    if (this.activeTarget === "desktop") {
-      const state = this.desktopAdapter.getState();
-      return { target: "desktop", status: state.status };
-    }
-
     const device = this.activeDevice;
     if (device) {
       return { target: device.platform, status: device.state };
@@ -148,53 +121,17 @@ export class DeviceManager {
     return { target: this.activeTarget, status: "no device" };
   }
 
-  // ============ Desktop Specific ============
-
-  async launchDesktopApp(options: LaunchOptions): Promise<string> {
-    await this.desktopAdapter.launch(options);
-    this.activeTarget = "desktop";
-    if (options.projectPath) {
-      return `Desktop automation started. Also launching app from ${options.projectPath}`;
-    }
-    return "Desktop automation started";
-  }
-
-  async stopDesktopApp(): Promise<void> {
-    await this.desktopAdapter.stop();
-  }
-
   async cleanup(): Promise<void> {
     try { await this.activeSonicAdapter?.dispose?.(); } catch {}
-    try { await this.desktopAdapter.stop(); } catch {}
     try { this.iosAdapter.getClient().cleanup(); } catch {}
     try { this.webViewInspector?.cleanup(); } catch {}
-    try { await this.browserAdapter.cleanup(); } catch {}
-  }
-
-  getBrowserAdapter(): BrowserAdapter {
-    return this.browserAdapter;
-  }
-
-  getDesktopClient(): DesktopClient {
-    return this.desktopAdapter.getClient();
-  }
-
-  isDesktopRunning(): boolean {
-    return this.desktopAdapter.isRunning();
   }
 
   // ============ Device Management ============
 
   getAllDevices(): Device[] {
     if (this.sonicEnabled && this.sonicSource) {
-      const sonicDevices = this.sonicSource.listDevices();
-      const localNonMobile: Device[] = [];
-      for (const [platform, adapter] of this.adapters) {
-        if (platform !== "android" && platform !== "ios") {
-          localNonMobile.push(...adapter.listDevices());
-        }
-      }
-      return [...sonicDevices, ...localNonMobile];
+      return this.sonicSource.listDevices();
     }
     const devices: Device[] = [];
     for (const adapter of this.adapters.values()) {
@@ -212,21 +149,6 @@ export class DeviceManager {
   }
 
   async setDevice(deviceId: string, platform?: Platform): Promise<Device> {
-    // Handle desktop special case
-    if (deviceId === "desktop" || platform === "desktop") {
-      if (!this.desktopAdapter.isRunning()) {
-        throw new Error("Desktop app is not running. Use launch_desktop_app first.");
-      }
-      this.activeTarget = "desktop";
-      return {
-        id: "desktop",
-        name: "Desktop App",
-        platform: "desktop",
-        state: "running",
-        isSimulator: false,
-      };
-    }
-
     const devices = this.getAllDevices();
 
     // Find device by ID
@@ -272,15 +194,6 @@ export class DeviceManager {
   }
 
   getActiveDevice(): Device | undefined {
-    if (this.activeTarget === "desktop" && this.desktopAdapter.isRunning()) {
-      return {
-        id: "desktop",
-        name: "Desktop App",
-        platform: "desktop",
-        state: "running",
-        isSimulator: false,
-      };
-    }
     return this.activeDevice;
   }
 
@@ -423,10 +336,6 @@ export class DeviceManager {
 
   getIosClient(): IosClient {
     return this.iosAdapter.getClient();
-  }
-
-  getAuroraClient(): AuroraClient {
-    return this.auroraAdapter.getClient();
   }
 
   getWebViewInspector(): WebViewInspector {

@@ -116,9 +116,6 @@ export async function generateActionHints(platform: string | undefined): Promise
       const json = await deviceManager.getUiHierarchy("ios");
       const tree = JSON.parse(json);
       afterElements = iosTreeToUiElements(tree);
-    } else if (currentPlatform === "desktop") {
-      const text = await deviceManager.getUiHierarchyAsync("desktop");
-      afterElements = desktopHierarchyToUiElements(text);
     }
   } catch (hintError: any) {
     const reason = hintError?.message ?? "unknown error";
@@ -168,11 +165,6 @@ export async function getElementsForPlatform(plat: string): Promise<UiElement[]>
     const elements = iosTreeToUiElements(tree);
     setCachedElements("ios", elements);
     return elements;
-  } else if (plat === "desktop") {
-    const text = await deviceManager.getUiHierarchyAsync("desktop");
-    const elements = desktopHierarchyToUiElements(text);
-    setCachedElements("desktop", elements);
-    return elements;
   }
   return [];
 }
@@ -180,7 +172,7 @@ export async function getElementsForPlatform(plat: string): Promise<UiElement[]>
 // Platform parameter schema (reused across tools)
 export const platformParam = {
   type: "string",
-  enum: ["android", "ios", "desktop", "aurora", "browser"],
+  enum: ["android", "ios"],
   description: "Target platform. If not specified, uses the active target.",
 };
 

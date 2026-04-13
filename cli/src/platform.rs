@@ -9,8 +9,6 @@ use anyhow::{Result, bail};
 pub enum Platform {
     Android,
     Ios,
-    Desktop,
-    Aurora,
 }
 
 impl FromStr for Platform {
@@ -20,9 +18,7 @@ impl FromStr for Platform {
         match s.to_lowercase().as_str() {
             "android" => Ok(Platform::Android),
             "ios" => Ok(Platform::Ios),
-            "desktop" => Ok(Platform::Desktop),
-            "aurora" => Ok(Platform::Aurora),
-            _ => bail!("Unknown platform: {}. Use 'android', 'ios', 'desktop', or 'aurora'", s),
+            _ => bail!("Unknown platform: {}. Use 'android' or 'ios'", s),
         }
     }
 }
@@ -32,8 +28,6 @@ impl fmt::Display for Platform {
         match self {
             Platform::Android => write!(f, "android"),
             Platform::Ios => write!(f, "ios"),
-            Platform::Desktop => write!(f, "desktop"),
-            Platform::Aurora => write!(f, "aurora"),
         }
     }
 }
@@ -45,13 +39,5 @@ impl Platform {
 
     pub fn is_ios(&self) -> bool {
         matches!(self, Platform::Ios)
-    }
-
-    pub fn is_desktop(&self) -> bool {
-        matches!(self, Platform::Desktop)
-    }
-
-    pub fn is_aurora(&self) -> bool {
-        matches!(self, Platform::Aurora)
     }
 }

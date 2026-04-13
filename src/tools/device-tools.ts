@@ -30,9 +30,6 @@ export const deviceTools: ToolDefinition[] = [
 
       const android = devices.filter(d => d.platform === "android");
       const ios = devices.filter(d => d.platform === "ios");
-      const desktop = devices.filter(d => d.platform === "desktop");
-      const aurora = devices.filter(d => d.platform === "aurora");
-      const browser = devices.filter(d => d.platform === "browser");
 
       let result = "Connected devices:\n";
 
@@ -51,30 +48,6 @@ export const deviceTools: ToolDefinition[] = [
           const active = activeDevice?.id === d.id && activeTarget === "ios" ? " [ACTIVE]" : "";
           const type = d.isSimulator ? "simulator" : "physical";
           result += `  • ${d.id} - ${d.name} (${type}, ${d.state})${active}\n`;
-        }
-      }
-
-      if (desktop.length > 0) {
-        result += "\nDesktop:\n";
-        for (const d of desktop) {
-          const active = activeTarget === "desktop" ? " [ACTIVE]" : "";
-          result += `  • ${d.id} - ${d.name} (${d.state})${active}\n`;
-        }
-      }
-
-      if (aurora.length > 0) {
-        result += "\nAurora:\n";
-        for (const d of aurora) {
-          const active = activeDevice?.id === d.id && activeTarget === "aurora" ? " [ACTIVE]" : "";
-          result += `  • ${d.id} - ${d.name} (${d.state})${active}\n`;
-        }
-      }
-
-      if (browser.length > 0) {
-        result += "\nBrowser:\n";
-        for (const d of browser) {
-          const active = activeTarget === "browser" ? " [ACTIVE]" : "";
-          result += `  • ${d.id} - ${d.name} (${d.state})${active}\n`;
         }
       }
 
