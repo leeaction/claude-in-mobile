@@ -3,6 +3,7 @@ import type { Device } from "../device-manager.js";
 import type { CompressOptions } from "../utils/image.js";
 import type { SonicConnectionInfo } from "./sonic-device-source.js";
 import { SonicWsClient } from "./sonic-ws-client.js";
+import { log } from "../utils/logger.js";
 
 export class SonicAndroidAdapter implements PlatformAdapter {
   readonly platform = "android" as const;
@@ -40,7 +41,7 @@ export class SonicAndroidAdapter implements PlatformAdapter {
     const size = await import("../utils/image.js").then(m => m.getImageDimensions(buf));
     this.screenWidth = size.width;
     this.screenHeight = size.height;
-    console.error(`[Sonic] Connected to ${this.udId} with screen size ${this.screenWidth}x${this.screenHeight}`);
+    log(`[Sonic] Connected to ${this.udId} with screen size ${this.screenWidth}x${this.screenHeight}`);
   }
 
   async dispose(): Promise<void> {
@@ -55,9 +56,9 @@ export class SonicAndroidAdapter implements PlatformAdapter {
 
   // Core actions - Sonic receives relative coordinates (0-1000) and converts to absolute
   async tap(x: number, y: number, _targetPid?: number): Promise<void> {
-    console.error(`[Sonic] tap input: (${x}, ${y})`);
+    log(`[Sonic] tap input: (${x}, ${y})`);
     const { x: absX, y: absY } = this.toAbsolute(x, y);
-    console.error(`[Sonic] tap absolute: (${absX}, ${absY})`);
+    log(`[Sonic] tap absolute: (${absX}, ${absY})`);
     this.client.send({ type: "debug", detail: "tap", point: `${absX},${absY}` });
   }
 

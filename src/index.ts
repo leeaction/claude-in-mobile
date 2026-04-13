@@ -43,7 +43,7 @@ registerTools([
   ...deviceTools,
   ...screenshotTools,
   ...interactionTools,
-  ...uiTools,
+//  ...uiTools,
   ...appTools,
   ...permissionTools,
   ...systemTools,
