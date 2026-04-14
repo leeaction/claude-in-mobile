@@ -53,7 +53,10 @@
       "Bash(sed -i '' '/\"desktop\" => desktop::/d' src/main.rs)",
       "Bash(sed -i '' 's/,\\\\s*companion_path//g' src/main.rs)",
       "Bash(sed -i '' 's/companion_path,//g' src/main.rs)",
-      "Bash(sed -i '' 's/companion_path//g' src/main.rs)"
+      "Bash(sed -i '' 's/companion_path//g' src/main.rs)",
+      "mcp__mobile__app_list",
+      "mcp__mobile__ui_analyze",
+      "mcp__mobile__ui_find_tap"
     ]
   }
 }
