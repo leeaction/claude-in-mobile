@@ -11,7 +11,7 @@ export const appTools: ToolDefinition[] = [
         type: "object",
         properties: {
           package: { type: "string", description: "Package name (Android) or bundle ID (iOS), e.g., com.android.settings or com.apple.Preferences" },
-          platform: { type: "string", enum: ["android", "ios", "desktop", "aurora", "browser"], description: "Target platform. If not specified, uses the active target." },
+          platform: { type: "string", enum: ["android", "ios"], description: "Target platform. If not specified, uses the active target." },
         },
         required: ["package"],
       },
@@ -30,7 +30,7 @@ export const appTools: ToolDefinition[] = [
         type: "object",
         properties: {
           package: { type: "string", description: "Package name (Android) or bundle ID (iOS)" },
-          platform: { type: "string", enum: ["android", "ios", "desktop", "aurora", "browser"], description: "Target platform. If not specified, uses the active target." },
+          platform: { type: "string", enum: ["android", "ios"], description: "Target platform. If not specified, uses the active target." },
         },
         required: ["package"],
       },
@@ -49,7 +49,7 @@ export const appTools: ToolDefinition[] = [
         type: "object",
         properties: {
           path: { type: "string", description: "Path to APK (Android) or .app bundle (iOS)" },
-          platform: { type: "string", enum: ["android", "ios", "desktop", "aurora", "browser"], description: "Target platform. If not specified, uses the active target." },
+          platform: { type: "string", enum: ["android", "ios"], description: "Target platform. If not specified, uses the active target." },
         },
         required: ["path"],
       },
@@ -67,7 +67,7 @@ export const appTools: ToolDefinition[] = [
       inputSchema: {
         type: "object",
         properties: {
-          platform: { type: "string", enum: ["android", "ios", "aurora"], description: "Target platform" },
+          platform: { type: "string", enum: ["android", "ios"], description: "Target platform" },
         },
         required: [],
       },
@@ -75,11 +75,6 @@ export const appTools: ToolDefinition[] = [
     handler: async (args, ctx) => {
       const platform = args.platform as Platform | undefined;
       const currentPlatform = platform ?? ctx.deviceManager.getCurrentPlatform();
-
-      if (currentPlatform === "aurora") {
-        const packages = ctx.deviceManager.getAuroraClient().listPackages();
-        return { text: `Installed packages (${packages.length}):\n${packages.join("\n")}` };
-      }
 
       if (ctx.deviceManager.isSonicMode() && (currentPlatform === "android" || currentPlatform === "ios")) {
         const apps = await ctx.deviceManager.getAppList(platform);

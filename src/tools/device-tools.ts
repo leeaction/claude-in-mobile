@@ -12,8 +12,8 @@ export const deviceTools: ToolDefinition[] = [
         properties: {
           platform: {
             type: "string",
-            enum: ["android", "ios", "desktop", "aurora", "browser"],
-            description: "Filter by platform (android/ios). If not specified, shows all.",
+            enum: ["android", "ios"],
+            description: "Filter by platform. If not specified, shows all.",
           },
         },
       },
@@ -30,9 +30,6 @@ export const deviceTools: ToolDefinition[] = [
 
       const android = devices.filter(d => d.platform === "android");
       const ios = devices.filter(d => d.platform === "ios");
-      const desktop = devices.filter(d => d.platform === "desktop");
-      const aurora = devices.filter(d => d.platform === "aurora");
-      const browser = devices.filter(d => d.platform === "browser");
 
       let result = "Connected devices:\n";
 
@@ -54,30 +51,6 @@ export const deviceTools: ToolDefinition[] = [
         }
       }
 
-      if (desktop.length > 0) {
-        result += "\nDesktop:\n";
-        for (const d of desktop) {
-          const active = activeTarget === "desktop" ? " [ACTIVE]" : "";
-          result += `  • ${d.id} - ${d.name} (${d.state})${active}\n`;
-        }
-      }
-
-      if (aurora.length > 0) {
-        result += "\nAurora:\n";
-        for (const d of aurora) {
-          const active = activeDevice?.id === d.id && activeTarget === "aurora" ? " [ACTIVE]" : "";
-          result += `  • ${d.id} - ${d.name} (${d.state})${active}\n`;
-        }
-      }
-
-      if (browser.length > 0) {
-        result += "\nBrowser:\n";
-        for (const d of browser) {
-          const active = activeTarget === "browser" ? " [ACTIVE]" : "";
-          result += `  • ${d.id} - ${d.name} (${d.state})${active}\n`;
-        }
-      }
-
       return { text: result.trim() };
     },
   },
@@ -94,7 +67,7 @@ export const deviceTools: ToolDefinition[] = [
           },
           platform: {
             type: "string",
-            enum: ["android", "ios", "desktop", "aurora", "browser"],
+            enum: ["android", "ios"],
             description: "Target platform. If not specified, uses the active target.",
           },
         },
@@ -110,13 +83,13 @@ export const deviceTools: ToolDefinition[] = [
   {
     tool: {
       name: "device_set_target",
-      description: "Switch the active target between Android, iOS, Desktop, and Aurora platforms",
+      description: "Switch the active target between Android and iOS platforms",
       inputSchema: {
         type: "object",
         properties: {
           target: {
             type: "string",
-            enum: ["android", "ios", "desktop", "aurora", "browser"],
+            enum: ["android", "ios"],
             description: "Target platform to switch to",
           },
         },

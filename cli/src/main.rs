@@ -1,10 +1,8 @@
 //! claude-in-mobile - Fast CLI for mobile device automation
 //!
-//! Supports Android (via ADB), iOS (via simctl), Aurora (via audb), Desktop (via companion app)
+//! Supports Android (via ADB), iOS (via simctl)
 
 mod android;
-mod aurora;
-mod desktop;
 mod ios;
 mod screenshot;
 mod sonic;
@@ -16,7 +14,7 @@ use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
 #[command(name = "claude-in-mobile")]
-#[command(about = "Fast CLI for mobile device automation (Android/iOS/Aurora/Desktop)")]
+#[command(about = "Fast CLI for mobile device automation (Android/iOS)")]
 #[command(version)]
 struct Cli {
     #[command(subcommand)]
@@ -27,8 +25,8 @@ struct Cli {
 enum Commands {
     /// Take a screenshot and optionally compress it
     Screenshot {
-        /// Platform: android, ios, aurora, or desktop
-        #[arg(value_parser = ["android", "ios", "aurora", "desktop"])]
+        /// Platform: android or ios
+        #[arg(value_parser = ["android", "ios"])]
         platform: String,
 
         /// Output file path (default: stdout as base64)
@@ -55,17 +53,9 @@ enum Commands {
         #[arg(long)]
         simulator: Option<String>,
 
-        /// Android/Aurora device serial (default: first device)
+        /// Android device serial (default: first device)
         #[arg(long)]
         device: Option<String>,
-
-        /// Desktop companion app path
-        #[arg(long)]
-        companion_path: Option<String>,
-
-        /// Monitor index for desktop screenshot
-        #[arg(long)]
-        monitor_index: Option<u32>,
     },
 
     /// Take annotated screenshot with UI element bounds
@@ -89,8 +79,8 @@ enum Commands {
 
     /// Tap at coordinates
     Tap {
-        /// Platform: android, ios, aurora, or desktop
-        #[arg(value_parser = ["android", "ios", "aurora", "desktop"])]
+        /// Platform: android or ios
+        #[arg(value_parser = ["android", "ios"])]
         platform: String,
 
         /// X coordinate
@@ -99,7 +89,7 @@ enum Commands {
         /// Y coordinate
         y: i32,
 
-        /// Tap by text instead of coordinates (Android/Desktop)
+        /// Tap by text instead of coordinates (Android)
         #[arg(long)]
         text: Option<String>,
 
@@ -115,19 +105,15 @@ enum Commands {
         #[arg(long)]
         simulator: Option<String>,
 
-        /// Android/Aurora device serial
+        /// Android device serial
         #[arg(long)]
         device: Option<String>,
-
-        /// Desktop companion app path
-        #[arg(long)]
-        companion_path: Option<String>,
     },
 
     /// Long press at coordinates
     LongPress {
-        /// Platform: android, ios, or aurora
-        #[arg(value_parser = ["android", "ios", "aurora"])]
+        /// Platform: android or ios
+        #[arg(value_parser = ["android", "ios"])]
         platform: String,
 
         /// X coordinate
@@ -148,15 +134,15 @@ enum Commands {
         #[arg(long)]
         simulator: Option<String>,
 
-        /// Android/Aurora device serial
+        /// Android device serial
         #[arg(long)]
         device: Option<String>,
     },
 
     /// Open URL in browser
     OpenUrl {
-        /// Platform: android, ios, or aurora
-        #[arg(value_parser = ["android", "ios", "aurora"])]
+        /// Platform: android or ios
+        #[arg(value_parser = ["android", "ios"])]
         platform: String,
 
         /// URL to open
@@ -166,15 +152,15 @@ enum Commands {
         #[arg(long)]
         simulator: Option<String>,
 
-        /// Android/Aurora device serial
+        /// Android device serial
         #[arg(long)]
         device: Option<String>,
     },
 
     /// Execute shell command on device
     Shell {
-        /// Platform: android, ios, or aurora
-        #[arg(value_parser = ["android", "ios", "aurora"])]
+        /// Platform: android or ios
+        #[arg(value_parser = ["android", "ios"])]
         platform: String,
 
         /// Command to execute
@@ -184,7 +170,7 @@ enum Commands {
         #[arg(long)]
         simulator: Option<String>,
 
-        /// Android/Aurora device serial
+        /// Android device serial
         #[arg(long)]
         device: Option<String>,
     },
@@ -197,8 +183,8 @@ enum Commands {
 
     /// Swipe gesture
     Swipe {
-        /// Platform: android, ios, or aurora
-        #[arg(value_parser = ["android", "ios", "aurora"])]
+        /// Platform: android or ios
+        #[arg(value_parser = ["android", "ios"])]
         platform: String,
 
         /// Start X
@@ -225,15 +211,15 @@ enum Commands {
         #[arg(long)]
         simulator: Option<String>,
 
-        /// Android/Aurora device serial
+        /// Android device serial
         #[arg(long)]
         device: Option<String>,
     },
 
     /// Input text
     Input {
-        /// Platform: android, ios, aurora, or desktop
-        #[arg(value_parser = ["android", "ios", "aurora", "desktop"])]
+        /// Platform: android or ios
+        #[arg(value_parser = ["android", "ios"])]
         platform: String,
 
         /// Text to input
@@ -243,19 +229,15 @@ enum Commands {
         #[arg(long)]
         simulator: Option<String>,
 
-        /// Android/Aurora device serial
+        /// Android device serial
         #[arg(long)]
         device: Option<String>,
-
-        /// Desktop companion app path
-        #[arg(long)]
-        companion_path: Option<String>,
     },
 
     /// Press a key/button
     Key {
-        /// Platform: android, ios, aurora, or desktop
-        #[arg(value_parser = ["android", "ios", "aurora", "desktop"])]
+        /// Platform: android or ios
+        #[arg(value_parser = ["android", "ios"])]
         platform: String,
 
         /// Key name (home, back, enter, etc.)
@@ -265,19 +247,15 @@ enum Commands {
         #[arg(long)]
         simulator: Option<String>,
 
-        /// Android/Aurora device serial
+        /// Android device serial
         #[arg(long)]
         device: Option<String>,
-
-        /// Desktop companion app path
-        #[arg(long)]
-        companion_path: Option<String>,
     },
 
     /// Dump UI hierarchy
     UiDump {
-        /// Platform: android, ios, or desktop
-        #[arg(value_parser = ["android", "ios", "desktop"])]
+        /// Platform: android or ios
+        #[arg(value_parser = ["android", "ios"])]
         platform: String,
 
         /// Output format: json or xml
@@ -295,23 +273,19 @@ enum Commands {
         /// Android device serial
         #[arg(long)]
         device: Option<String>,
-
-        /// Desktop companion app path
-        #[arg(long)]
-        companion_path: Option<String>,
     },
 
     /// List connected devices
     Devices {
-        /// Platform: android, ios, aurora, or all
-        #[arg(value_parser = ["android", "ios", "aurora", "all"], default_value = "all")]
+        /// Platform: android, ios, or all
+        #[arg(value_parser = ["android", "ios", "all"], default_value = "all")]
         platform: String,
     },
 
     /// List installed apps
     Apps {
-        /// Platform: android, ios, or aurora
-        #[arg(value_parser = ["android", "ios", "aurora"])]
+        /// Platform: android or ios
+        #[arg(value_parser = ["android", "ios"])]
         platform: String,
 
         /// Filter by package/bundle name
@@ -322,87 +296,79 @@ enum Commands {
         #[arg(long)]
         simulator: Option<String>,
 
-        /// Android/Aurora device serial
+        /// Android device serial
         #[arg(long)]
         device: Option<String>,
     },
 
     /// Launch an app
     Launch {
-        /// Platform: android, ios, aurora, or desktop
-        #[arg(value_parser = ["android", "ios", "aurora", "desktop"])]
+        /// Platform: android or ios
+        #[arg(value_parser = ["android", "ios"])]
         platform: String,
 
-        /// Package name (Android/Aurora) or bundle ID (iOS) or app path (Desktop)
+        /// Package name (Android) or bundle ID (iOS)
         package: String,
 
         /// iOS Simulator name
         #[arg(long)]
         simulator: Option<String>,
 
-        /// Android/Aurora device serial
+        /// Android device serial
         #[arg(long)]
         device: Option<String>,
-
-        /// Desktop companion app path
-        #[arg(long)]
-        companion_path: Option<String>,
     },
 
     /// Stop/kill an app
     Stop {
-        /// Platform: android, ios, aurora, or desktop
-        #[arg(value_parser = ["android", "ios", "aurora", "desktop"])]
+        /// Platform: android or ios
+        #[arg(value_parser = ["android", "ios"])]
         platform: String,
 
-        /// Package name (Android/Aurora) or bundle ID (iOS) or app name (Desktop)
+        /// Package name (Android) or bundle ID (iOS)
         package: String,
 
         /// iOS Simulator name
         #[arg(long)]
         simulator: Option<String>,
 
-        /// Android/Aurora device serial
+        /// Android device serial
         #[arg(long)]
         device: Option<String>,
-
-        /// Desktop companion app path
-        #[arg(long)]
-        companion_path: Option<String>,
     },
 
     /// Uninstall an app
     Uninstall {
-        /// Platform: android, ios, or aurora
-        #[arg(value_parser = ["android", "ios", "aurora"])]
+        /// Platform: android or ios
+        #[arg(value_parser = ["android", "ios"])]
         platform: String,
 
-        /// Package name (Android/Aurora) or bundle ID (iOS)
+        /// Package name (Android) or bundle ID (iOS)
         package: String,
 
         /// iOS Simulator name
         #[arg(long)]
         simulator: Option<String>,
 
-        /// Android/Aurora device serial
+        /// Android device serial
         #[arg(long)]
         device: Option<String>,
     },
 
     /// Install an app
     Install {
-        /// Platform: android, ios, or aurora
-        #[arg(value_parser = ["android", "ios", "aurora"])]
+        /// Platform: android or ios
+        #[arg(value_parser = ["android", "ios"])]
         platform: String,
 
-        /// Path to APK (Android), app bundle (iOS), or RPM (Aurora)
+        /// Path to APK (Android) or app bundle (iOS)
         path: String,
 
         /// iOS Simulator name
         #[arg(long)]
         simulator: Option<String>,
 
-        /// Android/Aurora device serial
+        /// Android device serial
         #[arg(long)]
         device: Option<String>,
     },
@@ -445,8 +411,8 @@ enum Commands {
 
     /// Get device logs
     Logs {
-        /// Platform: android, ios, or aurora
-        #[arg(value_parser = ["android", "ios", "aurora"])]
+        /// Platform: android or ios
+        #[arg(value_parser = ["android", "ios"])]
         platform: String,
 
         /// Filter by tag/process
@@ -473,37 +439,37 @@ enum Commands {
         #[arg(long)]
         simulator: Option<String>,
 
-        /// Android/Aurora device serial
+        /// Android device serial
         #[arg(long)]
         device: Option<String>,
     },
 
     /// Clear device logs
     ClearLogs {
-        /// Platform: android, ios, or aurora
-        #[arg(value_parser = ["android", "ios", "aurora"])]
+        /// Platform: android or ios
+        #[arg(value_parser = ["android", "ios"])]
         platform: String,
 
         /// iOS Simulator name
         #[arg(long)]
         simulator: Option<String>,
 
-        /// Android/Aurora device serial
+        /// Android device serial
         #[arg(long)]
         device: Option<String>,
     },
 
     /// Get system info (battery, memory)
     SystemInfo {
-        /// Platform: android, ios, or aurora
-        #[arg(value_parser = ["android", "ios", "aurora"])]
+        /// Platform: android or ios
+        #[arg(value_parser = ["android", "ios"])]
         platform: String,
 
         /// iOS Simulator name
         #[arg(long)]
         simulator: Option<String>,
 
-        /// Android/Aurora device serial
+        /// Android device serial
         #[arg(long)]
         device: Option<String>,
     },
@@ -589,8 +555,8 @@ enum Commands {
 
     /// Push file to device
     PushFile {
-        /// Platform: android or aurora
-        #[arg(value_parser = ["android", "aurora"])]
+        /// Platform: android
+        #[arg(value_parser = ["android"])]
         platform: String,
 
         /// Local file path
@@ -606,8 +572,8 @@ enum Commands {
 
     /// Pull file from device
     PullFile {
-        /// Platform: android or aurora
-        #[arg(value_parser = ["android", "aurora"])]
+        /// Platform: android
+        #[arg(value_parser = ["android"])]
         platform: String,
 
         /// Remote file path on device
@@ -623,8 +589,8 @@ enum Commands {
 
     /// Get clipboard content
     GetClipboard {
-        /// Platform: android, ios, or desktop
-        #[arg(value_parser = ["android", "ios", "desktop"])]
+        /// Platform: android or ios
+        #[arg(value_parser = ["android", "ios"])]
         platform: String,
 
         /// iOS Simulator name
@@ -634,16 +600,12 @@ enum Commands {
         /// Android device serial
         #[arg(long)]
         device: Option<String>,
-
-        /// Desktop companion app path
-        #[arg(long)]
-        companion_path: Option<String>,
     },
 
     /// Set clipboard content
     SetClipboard {
-        /// Platform: android, ios, or desktop
-        #[arg(value_parser = ["android", "ios", "desktop"])]
+        /// Platform: android or ios
+        #[arg(value_parser = ["android", "ios"])]
         platform: String,
 
         /// Text to set
@@ -656,77 +618,6 @@ enum Commands {
         /// Android device serial
         #[arg(long)]
         device: Option<String>,
-
-        /// Desktop companion app path
-        #[arg(long)]
-        companion_path: Option<String>,
-    },
-
-    /// Get performance metrics (Desktop only)
-    GetPerformanceMetrics {
-        /// Desktop companion app path
-        #[arg(long)]
-        companion_path: Option<String>,
-    },
-
-    /// List monitors (Desktop only)
-    GetMonitors {
-        /// Desktop companion app path
-        #[arg(long)]
-        companion_path: Option<String>,
-    },
-
-    /// Launch desktop app
-    LaunchDesktopApp {
-        /// App path
-        app_path: String,
-
-        /// Desktop companion app path
-        #[arg(long)]
-        companion_path: Option<String>,
-    },
-
-    /// Stop desktop app
-    StopDesktopApp {
-        /// App name
-        app_name: String,
-
-        /// Desktop companion app path
-        #[arg(long)]
-        companion_path: Option<String>,
-    },
-
-    /// Get desktop window info
-    GetWindowInfo {
-        /// Desktop companion app path
-        #[arg(long)]
-        companion_path: Option<String>,
-    },
-
-    /// Focus a desktop window
-    FocusWindow {
-        /// Window ID
-        window_id: String,
-
-        /// Desktop companion app path
-        #[arg(long)]
-        companion_path: Option<String>,
-    },
-
-    /// Resize a desktop window
-    ResizeWindow {
-        /// Window ID
-        window_id: String,
-
-        /// Width
-        width: u32,
-
-        /// Height
-        height: u32,
-
-        /// Desktop companion app path
-        #[arg(long)]
-        companion_path: Option<String>,
     },
 }
 
@@ -755,31 +646,7 @@ fn run(cli: Cli) -> Result<()> {
             quality,
             simulator,
             device,
-            companion_path,
-            monitor_index: _,
         } => {
-            if platform == "desktop" {
-                let data = desktop::screenshot(companion_path.as_deref())?;
-                if let Some(path) = output.as_deref() {
-                    std::fs::write(path, &data)?;
-                    eprintln!("Screenshot saved to: {}", path);
-                } else {
-                    let b64 = base64::Engine::encode(&base64::engine::general_purpose::STANDARD, &data);
-                    println!("{}", b64);
-                }
-                return Ok(());
-            }
-            if platform == "aurora" {
-                let data = aurora::screenshot(device.as_deref())?;
-                if let Some(path) = output.as_deref() {
-                    std::fs::write(path, &data)?;
-                    eprintln!("Screenshot saved to: {}", path);
-                } else {
-                    let b64 = base64::Engine::encode(&base64::engine::general_purpose::STANDARD, &data);
-                    println!("{}", b64);
-                }
-                return Ok(());
-            }
             screenshot::take_screenshot(
                 &platform,
                 output.as_deref(),
@@ -814,19 +681,13 @@ fn run(cli: Cli) -> Result<()> {
             index: _,
             simulator,
             device,
-            companion_path,
         } => {
             if let Some(t) = text {
-                if platform == "desktop" {
-                    return desktop::tap_by_text(&t, companion_path.as_deref());
-                }
                 return android::tap_element(&t, device.as_deref());
             }
             match platform.as_str() {
                 "android" => android::tap(x, y, device.as_deref()),
                 "ios" => ios::tap(x, y, simulator.as_deref()),
-                "aurora" => aurora::tap(x, y, device.as_deref()),
-                "desktop" => desktop::tap(x, y, companion_path.as_deref()),
                 _ => unreachable!(),
             }
         }
@@ -858,7 +719,6 @@ fn run(cli: Cli) -> Result<()> {
             match platform.as_str() {
                 "android" => android::swipe(x1, y1, x2, y2, duration, device.as_deref()),
                 "ios" => ios::swipe(x1, y1, x2, y2, duration, simulator.as_deref()),
-                "aurora" => aurora::swipe(x1, y1, x2, y2, duration, device.as_deref()),
                 _ => unreachable!(),
             }
         }
@@ -868,13 +728,10 @@ fn run(cli: Cli) -> Result<()> {
             text,
             simulator,
             device,
-            companion_path,
         } => {
             match platform.as_str() {
                 "android" => android::input_text(&text, device.as_deref()),
                 "ios" => ios::input_text(&text, simulator.as_deref()),
-                "aurora" => aurora::input_text(&text, device.as_deref()),
-                "desktop" => desktop::input_text(&text, companion_path.as_deref()),
                 _ => unreachable!(),
             }
         }
@@ -884,13 +741,10 @@ fn run(cli: Cli) -> Result<()> {
             key,
             simulator,
             device,
-            companion_path,
         } => {
             match platform.as_str() {
                 "android" => android::press_key(&key, device.as_deref()),
                 "ios" => ios::press_key(&key, simulator.as_deref()),
-                "aurora" => aurora::press_key(&key, device.as_deref()),
-                "desktop" => desktop::press_key(&key, companion_path.as_deref()),
                 _ => unreachable!(),
             }
         }
@@ -901,12 +755,10 @@ fn run(cli: Cli) -> Result<()> {
             show_all: _,
             simulator,
             device,
-            companion_path,
         } => {
             match platform.as_str() {
                 "android" => android::ui_dump(&format, device.as_deref()),
                 "ios" => ios::ui_dump(&format, simulator.as_deref()),
-                "desktop" => desktop::get_ui(companion_path.as_deref()),
                 _ => unreachable!(),
             }
         }
@@ -915,12 +767,10 @@ fn run(cli: Cli) -> Result<()> {
             match platform.as_str() {
                 "android" => android::print_devices(),
                 "ios" => ios::print_devices(),
-                "aurora" => aurora::print_devices(),
                 _ => {
                     android::print_devices()?;
                     ios::print_devices()?;
-                    aurora::print_devices()?;
-                    
+
                     // After listing local devices, append Sonic devices if SONIC_ENABLE is set
                     if std::env::var("SONIC_ENABLE").as_deref() == Ok("true") {
                         if let (Ok(base_url), Ok(agent_id), Ok(token)) = (
@@ -958,7 +808,6 @@ fn run(cli: Cli) -> Result<()> {
             match platform.as_str() {
                 "android" => android::list_apps(filter.as_deref(), device.as_deref()),
                 "ios" => ios::list_apps(filter.as_deref(), simulator.as_deref()),
-                "aurora" => aurora::list_apps(filter.as_deref(), device.as_deref()),
                 _ => unreachable!(),
             }
         }
@@ -968,13 +817,10 @@ fn run(cli: Cli) -> Result<()> {
             package,
             simulator,
             device,
-            companion_path,
         } => {
             match platform.as_str() {
                 "android" => android::launch_app(&package, device.as_deref()),
                 "ios" => ios::launch_app(&package, simulator.as_deref()),
-                "aurora" => aurora::launch_app(&package, device.as_deref()),
-                "desktop" => desktop::launch_app(&package, companion_path.as_deref()),
                 _ => unreachable!(),
             }
         }
@@ -984,13 +830,10 @@ fn run(cli: Cli) -> Result<()> {
             package,
             simulator,
             device,
-            companion_path,
         } => {
             match platform.as_str() {
                 "android" => android::stop_app(&package, device.as_deref()),
                 "ios" => ios::stop_app(&package, simulator.as_deref()),
-                "aurora" => aurora::stop_app(&package, device.as_deref()),
-                "desktop" => desktop::stop_app(&package, companion_path.as_deref()),
                 _ => unreachable!(),
             }
         }
@@ -1004,7 +847,6 @@ fn run(cli: Cli) -> Result<()> {
             match platform.as_str() {
                 "android" => android::install_app(&path, device.as_deref()),
                 "ios" => ios::install_app(&path, simulator.as_deref()),
-                "aurora" => aurora::install_app(&path, device.as_deref()),
                 _ => unreachable!(),
             }
         }
@@ -1049,7 +891,6 @@ fn run(cli: Cli) -> Result<()> {
             match platform.as_str() {
                 "android" => android::get_logs(filter.as_deref(), lines, device.as_deref()),
                 "ios" => ios::get_logs(filter.as_deref(), lines, simulator.as_deref()),
-                "aurora" => aurora::get_logs(filter.as_deref(), lines, device.as_deref()),
                 _ => unreachable!(),
             }
         }
@@ -1073,7 +914,6 @@ fn run(cli: Cli) -> Result<()> {
             match platform.as_str() {
                 "android" => android::long_press(x, y, duration, device.as_deref()),
                 "ios" => ios::long_press(x, y, duration, simulator.as_deref()),
-                "aurora" => aurora::long_press(x, y, duration, device.as_deref()),
                 _ => unreachable!(),
             }
         }
@@ -1087,7 +927,6 @@ fn run(cli: Cli) -> Result<()> {
             match platform.as_str() {
                 "android" => android::open_url(&url, device.as_deref()),
                 "ios" => ios::open_url(&url, simulator.as_deref()),
-                "aurora" => aurora::open_url(&url, device.as_deref()),
                 _ => unreachable!(),
             }
         }
@@ -1101,7 +940,6 @@ fn run(cli: Cli) -> Result<()> {
             match platform.as_str() {
                 "android" => { android::shell(&command, device.as_deref())?; }
                 "ios" => { ios::shell(&command, simulator.as_deref())?; }
-                "aurora" => { aurora::shell(&command, device.as_deref())?; }
                 _ => unreachable!(),
             }
             Ok(())
@@ -1121,7 +959,6 @@ fn run(cli: Cli) -> Result<()> {
             match platform.as_str() {
                 "android" => android::clear_logs(device.as_deref()),
                 "ios" => ios::clear_logs(simulator.as_deref()),
-                "aurora" => aurora::clear_logs(device.as_deref()),
                 _ => unreachable!(),
             }
         }
@@ -1134,7 +971,6 @@ fn run(cli: Cli) -> Result<()> {
             match platform.as_str() {
                 "android" => android::get_system_info(device.as_deref()),
                 "ios" => ios::get_system_info(simulator.as_deref()),
-                "aurora" => aurora::get_system_info(device.as_deref()),
                 _ => unreachable!(),
             }
         }
@@ -1160,7 +996,6 @@ fn run(cli: Cli) -> Result<()> {
             match platform.as_str() {
                 "android" => android::uninstall_app(&package, device.as_deref()),
                 "ios" => ios::uninstall_app(&package, simulator.as_deref()),
-                "aurora" => aurora::uninstall_app(&package, device.as_deref()),
                 _ => unreachable!(),
             }
         }
@@ -1222,7 +1057,6 @@ fn run(cli: Cli) -> Result<()> {
         } => {
             match platform.as_str() {
                 "android" => android::push_file(&local, &remote, device.as_deref()),
-                "aurora" => aurora::push_file(&local, &remote, device.as_deref()),
                 _ => unreachable!(),
             }
         }
@@ -1235,7 +1069,6 @@ fn run(cli: Cli) -> Result<()> {
         } => {
             match platform.as_str() {
                 "android" => android::pull_file(&remote, &local, device.as_deref()),
-                "aurora" => aurora::pull_file(&remote, &local, device.as_deref()),
                 _ => unreachable!(),
             }
         }
@@ -1244,12 +1077,10 @@ fn run(cli: Cli) -> Result<()> {
             platform,
             simulator: _,
             device,
-            companion_path,
         } => {
             match platform.as_str() {
                 "android" => android::get_clipboard(device.as_deref()),
                 "ios" => ios::get_clipboard(None),
-                "desktop" => desktop::get_clipboard(companion_path.as_deref()),
                 _ => unreachable!(),
             }
         }
@@ -1259,42 +1090,13 @@ fn run(cli: Cli) -> Result<()> {
             text,
             simulator: _,
             device,
-            companion_path,
         } => {
             match platform.as_str() {
                 "android" => android::set_clipboard(&text, device.as_deref()),
                 "ios" => ios::set_clipboard(&text, None),
-                "desktop" => desktop::set_clipboard(&text, companion_path.as_deref()),
                 _ => unreachable!(),
             }
         }
 
-        Commands::GetPerformanceMetrics { companion_path } => {
-            desktop::get_performance_metrics(companion_path.as_deref())
-        }
-
-        Commands::GetMonitors { companion_path } => {
-            desktop::get_monitors(companion_path.as_deref())
-        }
-
-        Commands::LaunchDesktopApp { app_path, companion_path } => {
-            desktop::launch_app(&app_path, companion_path.as_deref())
-        }
-
-        Commands::StopDesktopApp { app_name, companion_path } => {
-            desktop::stop_app(&app_name, companion_path.as_deref())
-        }
-
-        Commands::GetWindowInfo { companion_path } => {
-            desktop::get_window_info(companion_path.as_deref())
-        }
-
-        Commands::FocusWindow { window_id, companion_path } => {
-            desktop::focus_window(&window_id, companion_path.as_deref())
-        }
-
-        Commands::ResizeWindow { window_id, width, height, companion_path } => {
-            desktop::resize_window(&window_id, width, height, companion_path.as_deref())
-        }
     }
 }

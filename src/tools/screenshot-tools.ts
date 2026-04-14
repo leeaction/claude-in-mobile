@@ -34,7 +34,7 @@ export const screenshotTools: ToolDefinition[] = [
         properties: {
           platform: {
             type: "string",
-            enum: ["android", "ios", "desktop", "aurora", "browser"],
+            enum: ["android", "ios"],
             description: "Target platform. If not specified, uses the active target.",
           },
           compress: {
@@ -175,7 +175,7 @@ export const screenshotTools: ToolDefinition[] = [
         properties: {
           platform: {
             type: "string",
-            enum: ["android", "ios", "desktop", "aurora", "browser"],
+            enum: ["android", "ios"],
             description: "Target platform. If not specified, uses the active target.",
           },
           maxWidth: {
@@ -199,7 +199,9 @@ export const screenshotTools: ToolDefinition[] = [
     handler: async (args, ctx) => {
       const platform = args.platform as Platform | undefined;
       const currentPlat = platform ?? ctx.deviceManager.getCurrentPlatform();
-      if (currentPlat === "desktop" || currentPlat === "aurora") {
+      if (!currentPlat || currentPlat === "android" || currentPlat === "ios") {
+        // Supported platforms, continue
+      } else {
         return { text: `annotate_screenshot is not supported for ${currentPlat} platform. Use screenshot + get_ui instead.` };
       }
 

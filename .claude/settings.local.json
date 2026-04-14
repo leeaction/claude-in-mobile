@@ -47,7 +47,13 @@
       "mcp__mobile__device_get_target",
       "mcp__mobile__device_set_target",
       "Bash(npx tsc:*)",
-      "mcp__mobile__input_long_press"
+      "mcp__mobile__input_long_press",
+      "Bash(awk '{print $9}')",
+      "Bash(sed -i '' '/\"aurora\" => aurora::/d' src/main.rs)",
+      "Bash(sed -i '' '/\"desktop\" => desktop::/d' src/main.rs)",
+      "Bash(sed -i '' 's/,\\\\s*companion_path//g' src/main.rs)",
+      "Bash(sed -i '' 's/companion_path,//g' src/main.rs)",
+      "Bash(sed -i '' 's/companion_path//g' src/main.rs)"
     ]
   }
 }
