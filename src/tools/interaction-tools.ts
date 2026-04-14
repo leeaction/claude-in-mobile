@@ -24,7 +24,7 @@ export const interactionTools: ToolDefinition[] = [
   {
     tool: {
       name: "input_tap",
-      description: "Tap at specific coordinates or find an element by text/id and tap it",
+      description: "点击操作，点击屏幕上的特定点。可用此操作点击按钮、选择项目、从主屏幕打开应用程序，或与任何可点击的用户界面元素进行交互。坐标系统从左上角 (0,0) 开始到右下角（999,999)结束。此操作完成后，您将自动收到结果状态的截图。",
       inputSchema: {
         type: "object",
         properties: {

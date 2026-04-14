@@ -28,7 +28,7 @@ export const screenshotTools: ToolDefinition[] = [
   {
     tool: {
       name: "screen_capture",
-      description: "Take a screenshot of the device screen. FALLBACK ONLY — prefer ui_tree for inspecting UI elements (text-based, ~10x cheaper). Use screen_capture only when: visual layout verification is needed, ui_tree fails, or you need to confirm something visually. Images are auto-compressed. Use diff mode to only see what changed (saves 60-80% tokens).",
+      description: "Take a screenshot of the device screen. Images are auto-compressed. Use diff mode to only see what changed (saves 60-80% tokens).",
       inputSchema: {
         type: "object",
         properties: {

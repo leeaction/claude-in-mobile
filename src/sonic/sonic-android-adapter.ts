@@ -100,13 +100,34 @@ export class SonicAndroidAdapter implements PlatformAdapter {
   }
 
   async pressKey(key: string, _targetPid?: number): Promise<void> {
-    this.client.send({ type: "keyEvent", detail: key });
+    // Map common key names to Android key codes
+    const keyCodeMap: Record<string, string> = {
+      "HOME": "3",
+      "BACK": "4",
+      "POWER": "26",
+      "VOLUME_UP": "24",
+      "VOLUME_DOWN": "25",
+      "MENU": "82",
+      "ENTER": "66",
+      "TAB": "61",
+      "DELETE": "67",
+      "ESCAPE": "111",
+      "DPAD_UP": "19",
+      "DPAD_DOWN": "20",
+      "DPAD_LEFT": "21",
+      "DPAD_RIGHT": "22",
+      "DPAD_CENTER": "23",
+    };
+
+    // Convert key name to key code if mapping exists, otherwise use as-is
+    const keyCode = keyCodeMap[key.toUpperCase()] || key;
+    this.client.send({ type: "keyEvent", detail: keyCode });
   }
 
   // Screenshot
   async screenshotAsync(compress: boolean, _options?: CompressOptions): Promise<{ data: string; mimeType: string }> {
     const buf = await this.client.sendForBinary({ type: "debug", detail: "screenshot" }, 15_000);
-    return { data: buf.toString("base64"), mimeType: "image/jpeg" };
+    return { data: buf.toString("base64"), mimeType: "image/png" };
   }
 
   async getScreenshotBufferAsync(): Promise<Buffer> {

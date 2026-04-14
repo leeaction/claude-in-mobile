@@ -11,6 +11,7 @@ import { registerTools, registerAliases, registerAliasesWithDefaults, getTools, 
 import { createToolContext, MAX_RECURSION_DEPTH } from "./tools/context.js";
 import { deviceTools } from "./tools/device-tools.js";
 import { screenshotTools } from "./tools/screenshot-tools.js";
+import { screenshotToolsSimple } from "./tools/screenshot-tools-simple.js";
 import { interactionTools } from "./tools/interaction-tools.js";
 import { uiTools } from "./tools/ui-tools.js";
 import { appTools } from "./tools/app-tools.js";
@@ -41,9 +42,10 @@ const ctx = createToolContext(handleTool);
 // Register all tool groups
 registerTools([
   ...deviceTools,
-  ...screenshotTools,
+  //...screenshotTools,
+  ...screenshotToolsSimple,
   ...interactionTools,
-  ...uiTools,
+  //...uiTools,
   ...appTools,
   ...permissionTools,
   ...systemTools,
@@ -142,7 +144,7 @@ const server = new Server(
     capabilities: {
       tools: {},
     },
-    instructions: "Mobile automation for Android and iOS. IMPORTANT: Always use 'ui_tree' first to inspect the screen — it is text-based and ~10x cheaper than screenshots. Use 'screen_capture' only as fallback when visual verification is required or ui_tree is insufficient. Use 'input_tap' to interact. Use 'device_list' to see connected devices.",
+    instructions: "Mobile automation for Android and iOS. IMPORTANT: Always use 'screen_capture' first to inspect the screen Use 'input_tap' to interact. Use 'device_list' to see connected devices.",
   }
 );
 
